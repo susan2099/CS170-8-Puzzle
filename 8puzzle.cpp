@@ -2,10 +2,28 @@
 using namespace std;
 
 // define Node
-class Node {
-public:
+struct Node {
+    Node* parent;
     int puzzle[3][3];
     int x, y;
+    int goal[3][3] = {{1,2,3},{4,5,6},{7,8,0}};
+    Node() : parent(nullptr), x(0), y(0) {
+        for(int i = 0; i < 3; ++i) {
+            for(int j = 0; j<3;++j) {
+                this->puzzle[i][j] = goal[i][j]; 
+            }
+        }
+    }
+    Node(Node* parent, int puzzle[3][3], int x, int y) {
+        this->parent = parent;
+        this->x = x;
+        this->y = y;
+        for(int i = 0; i < 3; ++i) {
+            for(int j = 0; j < 3; ++j) {
+                this->puzzle[i][j] = puzzle[i][j];
+            }
+        }
+    }
     int cost;
     int depth;
 };
@@ -124,9 +142,11 @@ int solve(int puzzle[3][3], int goal[3][3], int choice) {
     while (!queue.empty()) {
     // get current node and pop
         Node current = queue.top();
+        printPuzzle(current.puzzle);
         queue.pop();
         //num_moves++;
         nodes_expanded++;
+        //printPuzzle(current.puzzle);
 
     // is puzzle solved?
         if (memcmp(current.puzzle, goal, sizeof(current.puzzle)) == 0) {
@@ -144,6 +164,7 @@ int solve(int puzzle[3][3], int goal[3][3], int choice) {
         int y = current.y;
         if (x > 0) {
             Node next = current;
+            
             next.x--;
             swap(next.puzzle[x][y], next.puzzle[x - 1][y]);
             string key = to_string(next.puzzle[0][0]) + to_string(next.puzzle[0][1]) + to_string(next.puzzle[0][2]) +
@@ -200,6 +221,7 @@ int solve(int puzzle[3][3], int goal[3][3], int choice) {
                 }
                 visited.insert(key);
                 queue.push(next);
+
             }
         }
         if (y < 2) {
@@ -220,6 +242,7 @@ int solve(int puzzle[3][3], int goal[3][3], int choice) {
                 }
                 visited.insert(key);
                 queue.push(next);
+
             }
         }
 // update max_queue
@@ -231,9 +254,9 @@ int solve(int puzzle[3][3], int goal[3][3], int choice) {
 
 int main() {
     int choice = 0, puzzle[3][3];
-    int goal[3][3] = {{1,2,3},{4,5,6},{7,8,0}};
     cout << "1: use default puzzle or 2: enter a custom puzzle: ";
     cin >> choice;
+    int goal[3][3] = {{1,2,3},{4,5,6},{7,8,0}};
     if (choice == 2) {
         cout << "enter the puzzle(add space in between each number) : ex) 1 2 3 4 5 6 7 8 0" << endl;
         for (int i = 0; i < 3; i++) {
