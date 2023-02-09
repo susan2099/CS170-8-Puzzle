@@ -1,32 +1,18 @@
 #include <bits/stdc++.h>
+#include <queue>
+#include <iostream>
 using namespace std;
 
 // define Node
-struct Node {
-    Node* parent;
+class Node {
+public:
     int puzzle[3][3];
     int x, y;
-    int goal[3][3] = {{1,2,3},{4,5,6},{7,8,0}};
-    Node() : parent(nullptr), x(0), y(0) {
-        for(int i = 0; i < 3; ++i) {
-            for(int j = 0; j<3;++j) {
-                this->puzzle[i][j] = goal[i][j]; 
-            }
-        }
-    }
-    Node(Node* parent, int puzzle[3][3], int x, int y) {
-        this->parent = parent;
-        this->x = x;
-        this->y = y;
-        for(int i = 0; i < 3; ++i) {
-            for(int j = 0; j < 3; ++j) {
-                this->puzzle[i][j] = puzzle[i][j];
-            }
-        }
-    }
     int cost;
     int depth;
+   string path;
 };
+
 
 // define comparator for priority queue
 class Compare {
@@ -36,17 +22,28 @@ public:
     }
 };
 
+// print puzzle
+void printPuzzle(int puzz[3][3]) {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            cout << puzz[i][j] << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+}
+
 // uniform search
-int uniformSearch(int puzzle[3][3], int goal[3][3]) {
+int uniformSearch(int puzz[3][3], int goal[3][3]) {
     return 0;
 }
 
 // tiles misplaced heuristic
-int tilesMisplaced(int puzzle[3][3], int goal[3][3]) {
+int tilesMisplaced(int puzz[3][3], int goal[3][3]) {
     int count = 0;
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            if (puzzle[i][j] != 0 && puzzle[i][j] != goal[i][j]) {
+            if (puzz[i][j] != 0 && puzz[i][j] != goal[i][j]) {
                 count++;
             }
         }
@@ -55,15 +52,15 @@ int tilesMisplaced(int puzzle[3][3], int goal[3][3]) {
 }
 
 // euclidean distance heuristic
-int euclideanDistance(int puzzle[3][3], int goal[3][3]) {
+int euclideanDistance(int puzz[3][3], int goal[3][3]) {
     int count = 0;
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            if (puzzle[i][j] != 0) {
+            if (puzz[i][j] != 0) {
                 int x, y;
                 for (int k = 0; k < 3; k++) {
                     for (int l = 0; l < 3; l++) {
-                        if (goal[k][l] == puzzle[i][j]) {
+                        if (goal[k][l] == puzz[i][j]) {
                             x = k;
                             y = l;
                             break;
@@ -77,24 +74,15 @@ int euclideanDistance(int puzzle[3][3], int goal[3][3]) {
     return count;
 }
 
-// print puzzle
-void printPuzzle(int puzzle[3][3]) {
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            cout << puzzle[i][j] << " ";
-        }
-        cout << endl;
-    }
-    cout << endl;
-}
+
 
 // is puzzle solvable?
-bool isSolvable(int puzzle[3][3]) {
+bool isSolvable(int puzz[3][3]) {
     int count = 0;
     for (int i = 0; i < 9; i++) {
         for (int j = i + 1; j < 9; j++) {
-            if (puzzle[i / 3][i % 3] && puzzle[j / 3][j % 3] &&
-                puzzle[i / 3][i % 3] > puzzle[j / 3][j % 3]) {
+            if (puzz[i / 3][i % 3] && puzz[j / 3][j % 3] &&
+                puzz[i / 3][i % 3] > puzz[j / 3][j % 3]) {
                 count++;
             }
         }
@@ -102,10 +90,23 @@ bool isSolvable(int puzzle[3][3]) {
     return count % 2 == 0;
 }
 
+bool is_goal(int puzz[3][3], int goal[3][3]) {
+    for (int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3;j++) {
+        if (puzz[i][j] != goal[i][j]) {
+            return false;
+        }
+        }
+    }
+    return true;
+}
+
+
+
 // solve using uniform cost search
-int solve(int puzzle[3][3], int goal[3][3], int choice) {
+int solve(int puzz[3][3], int goal[3][3], int choice) {
     // condition if puzzle is not solvable
-    if (!isSolvable(puzzle)) {
+    if (!isSolvable(puzz)) {
     cout << "the puzzle is unsolvable" << endl;
     return -1;
     }
@@ -117,7 +118,7 @@ int solve(int puzzle[3][3], int goal[3][3], int choice) {
 
     // create initial node and push to queue
     Node initial;
-    memcpy(initial.puzzle, puzzle, sizeof(initial.puzzle));
+    memcpy(initial.puzzle, puzz, sizeof(initial.puzzle));
     initial.x = initial.y = -1;
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
@@ -129,6 +130,7 @@ int solve(int puzzle[3][3], int goal[3][3], int choice) {
         }
     }
     initial.depth = 0;
+    initial.path = "";
     if(choice == 1) {
         initial.cost = uniformSearch(initial.puzzle, goal);
     } else if(choice == 2){
@@ -136,139 +138,101 @@ int solve(int puzzle[3][3], int goal[3][3], int choice) {
     } else {
         initial.cost = euclideanDistance(initial.puzzle, goal);
     }
+    cout << endl << "------------- Initial state:" <<  "-------------" << endl;
+    printPuzzle(initial.puzzle);
     queue.push(initial);
     //int num_moves;
 
     while (!queue.empty()) {
     // get current node and pop
         Node current = queue.top();
-        printPuzzle(current.puzzle);
+       // cout << "current puzzle, move:  : " << current.depth << endl;
+      // printPuzzle(current.puzzle);
         queue.pop();
-        //num_moves++;
         nodes_expanded++;
-        //printPuzzle(current.puzzle);
-
-    // is puzzle solved?
-        if (memcmp(current.puzzle, goal, sizeof(current.puzzle)) == 0) {
-            cout << "Solution:" << endl;
-            printPuzzle(current.puzzle);
-            cout << "Expanded Nodes: " << nodes_expanded << endl;
-            cout << "Max Queue Size: " << max_queue << endl;
-            cout << "Depth Cost: " << current.depth << endl;
-            //cout << num_moves << endl;
-            return 0;
-        }
-
-    // possible moves
-        int x = current.x;
-        int y = current.y;
-        if (x > 0) {
-            Node next = current;
-            
-            next.x--;
-            swap(next.puzzle[x][y], next.puzzle[x - 1][y]);
-            string key = to_string(next.puzzle[0][0]) + to_string(next.puzzle[0][1]) + to_string(next.puzzle[0][2]) +
-                         to_string(next.puzzle[1][0]) + to_string(next.puzzle[1][1]) + to_string(next.puzzle[1][2]) +
-                         to_string(next.puzzle[2][0]) + to_string(next.puzzle[2][1]) + to_string(next.puzzle[2][2]);
-            if (visited.find(key) == visited.end()) {
-                next.depth = current.depth + 1;
-                if(choice == 1) {
-                    next.cost = uniformSearch(next.puzzle, goal);
-                } else if(choice == 2){
-                    next.cost = tilesMisplaced(next.puzzle, goal);
-                } else {
-                    next.cost = euclideanDistance(next.puzzle, goal);
-                }
-                visited.insert(key);
-                queue.push(next);
-            }
-        }
-        if (x < 2) {
-            Node next = current;
-            next.x++;
-            swap(next.puzzle[x][y], next.puzzle[x + 1][y]);
-            string key = to_string(next.puzzle[0][0]) + to_string(next.puzzle[0][1]) + to_string(next.puzzle[0][2]) +
-                         to_string(next.puzzle[1][0]) + to_string(next.puzzle[1][1]) + to_string(next.puzzle[1][2]) +
-                         to_string(next.puzzle[2][0]) + to_string(next.puzzle[2][1]) + to_string(next.puzzle[2][2]);
-            if (visited.find(key) == visited.end()) {
-                next.depth = current.depth + 1;
-                if(choice == 1) {
-                    next.cost = uniformSearch(next.puzzle, goal);
-                } else if(choice == 2){
-                next.cost = tilesMisplaced(next.puzzle, goal);
-                } else {
-                    next.cost = euclideanDistance(next.puzzle, goal);
-                }
-                visited.insert(key);
-                queue.push(next);
-            }
-        }
-        if (y > 0) {
-            Node next = current;
-            next.y--;
-            swap(next.puzzle[x][y], next.puzzle[x][y - 1]);
-            string key = to_string(next.puzzle[0][0]) + to_string(next.puzzle[0][1]) + to_string(next.puzzle[0][2]) +
-                         to_string(next.puzzle[1][0]) + to_string(next.puzzle[1][1]) + to_string(next.puzzle[1][2]) +
-                         to_string(next.puzzle[2][0]) + to_string(next.puzzle[2][1]) + to_string(next.puzzle[2][2]);
-            if (visited.find(key) == visited.end()) {
-                next.depth = current.depth + 1;
-                if(choice == 1) {
-                    next.cost = uniformSearch(next.puzzle, goal);
-                } else if(choice == 2){
-                    next.cost = tilesMisplaced(next.puzzle, goal);
-                } else {
-                    next.cost = euclideanDistance(next.puzzle, goal);
-                }
-                visited.insert(key);
-                queue.push(next);
-
-            }
-        }
-        if (y < 2) {
-            Node next = current;
-            next.y++;
-            swap(next.puzzle[x][y], next.puzzle[x][y + 1]);
-            string key = to_string(next.puzzle[0][0]) + to_string(next.puzzle[0][1]) + to_string(next.puzzle[0][2]) +
-                         to_string(next.puzzle[1][0]) + to_string(next.puzzle[1][1]) + to_string(next.puzzle[1][2]) +
-                         to_string(next.puzzle[2][0]) + to_string(next.puzzle[2][1]) + to_string(next.puzzle[2][2]);
-            if (visited.find(key) == visited.end()) {
-                next.depth = current.depth + 1;
-                if(choice == 1) {
-                    next.cost = uniformSearch(next.puzzle, goal);
-                } else if(choice == 2){
-                    next.cost = tilesMisplaced(next.puzzle, goal);
-                } else {
-                    next.cost = euclideanDistance(next.puzzle, goal);
-                }
-                visited.insert(key);
-                queue.push(next);
-
-            }
-        }
-// update max_queue
-    max_queue = max(max_queue, (int)queue.size());
     
+    // is puzzle solved?
+if (is_goal(current.puzzle, goal)) {
+    string puzzle = current.path;
+    for (int i = 0; i < current.depth; i++) {
+        cout << "------------- move: " << i+1 << "-------------" << endl;
+        string row1 = puzzle.substr(i * 9, 3);
+        string row2 = puzzle.substr(i * 9 + 3, 3);
+        string row3 = puzzle.substr(i * 9 + 6, 3);
+        cout << row1[0] << " " << row1[1] << " " << row1[2] << endl;
+        cout << row2[0] << " " << row2[1] << " " << row2[2] << endl;
+        cout << row3[0] << " " << row3[1] << " " << row3[2] << endl;
+        cout << endl;
     }
-    return 0;
+    cout << "number of nodes expanded: " << nodes_expanded << endl;
+    cout << "maximum queue size: " << max_queue << endl;
+    cout << "depth cost: " << current.depth << endl;
+    return current.depth;
+}
+
+// generate children
+int dx[] = {-1, 0, 1, 0};
+int dy[] = {0, 1, 0, -1};
+
+for (int i = 0; i < 4; i++) {
+    int x = current.x + dx[i];
+    int y = current.y + dy[i];
+    if (x >= 0 && x < 3 && y >= 0 && y < 3) {
+        Node child;
+        memcpy(child.puzzle, current.puzzle, sizeof(child.puzzle));
+        child.puzzle[current.x][current.y] = child.puzzle[x][y];
+        child.puzzle[x][y] = 0;
+        child.x = x;
+        child.y = y;
+        child.depth = current.depth + 1;
+        //child.path = current.path + state;
+        if (choice == 1) {
+            child.cost = uniformSearch(child.puzzle, goal);
+        } else if (choice == 2) {
+            child.cost = tilesMisplaced(child.puzzle, goal);
+        } else {
+            child.cost = euclideanDistance(child.puzzle, goal);
+        }
+
+        string state = "";
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                state += to_string(child.puzzle[i][j]);
+            }
+        }
+        //cout << 
+        
+        child.path = current.path + state;
+        //cout << current.path << endl;
+
+        if (visited.count(state) == 0) {
+            visited.insert(state);
+            queue.push(child);
+        }
+    }
+  }
+  max_queue = max(max_queue, (int)queue.size());
+}
+return 0;
 }
 
 int main() {
-    int choice = 0, puzzle[3][3];
+    int choice = 0, puzz[3][3];
     cout << "1: use default puzzle or 2: enter a custom puzzle: ";
     cin >> choice;
     int goal[3][3] = {{1,2,3},{4,5,6},{7,8,0}};
     if (choice == 2) {
-        cout << "enter the puzzle(add space in between each number) : ex) 1 2 3 4 5 6 7 8 0" << endl;
+        cout << "enter the puzzle(add a space in between each number) : ex) 1 2 3 4 5 6 7 8 0" << endl;
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                cin >> puzzle[i][j];
+                cin >> puzz[i][j];
             }
         }
     } else {
-        int defaultPuzzle[3][3] = {{1, 2, 3}, {5, 6, 0}, {7, 8, 4}};
+        int defaultpuzz[3][3] = {{1, 2, 3}, {5, 6, 0}, {7, 8, 4}};
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                puzzle[i][j] = defaultPuzzle[i][j];
+                puzz[i][j] = defaultpuzz[i][j];
             }
         }
     }
@@ -277,7 +241,7 @@ int main() {
     cout << "1: use uniform cost search, 2: use A* with tiles misplaced heuristic or 2: use A* with euclidean distance heuristic: ";
     cin >> search;
 
-    int result = solve(puzzle,goal, search);
+    int result = solve(puzz,goal, search);
 
     return 0;
 }
