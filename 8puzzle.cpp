@@ -88,7 +88,7 @@ bool isSolvable(int puzzle[3][3]) {
 int solve(int puzzle[3][3], int goal[3][3], int choice) {
     // condition if puzzle is not solvable
     if (!isSolvable(puzzle)) {
-    cout << "Error: The puzzle is unsolvable." << endl;
+    cout << "the puzzle is unsolvable" << endl;
     return -1;
     }
 
@@ -158,7 +158,6 @@ int solve(int puzzle[3][3], int goal[3][3], int choice) {
                 } else {
                     next.cost = euclideanDistance(next.puzzle, goal);
                 }
-                //next.cost = (choice == 1) ? tilesMisplaced(next.puzzle, goal) : euclideanDistance(next.puzzle, goal);
                 visited.insert(key);
                 queue.push(next);
             }
@@ -227,7 +226,6 @@ int solve(int puzzle[3][3], int goal[3][3], int choice) {
     max_queue = max(max_queue, (int)queue.size());
     
     }
-    //cout << "No solution found." << endl;
     return 0;
 }
 
