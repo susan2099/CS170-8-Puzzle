@@ -103,7 +103,7 @@ bool is_goal(int puzz[3][3], int goal[3][3]) {
 
 
 
-// solve using uniform cost search
+// solve and find optimal path
 int solve(int puzz[3][3], int goal[3][3], int choice) {
     // condition if puzzle is not solvable
     if (!isSolvable(puzz)) {
@@ -141,21 +141,18 @@ int solve(int puzz[3][3], int goal[3][3], int choice) {
     cout << endl << "------------- Initial state:" <<  "-------------" << endl;
     printPuzzle(initial.puzzle);
     queue.push(initial);
-    //int num_moves;
 
     while (!queue.empty()) {
     // get current node and pop
         Node current = queue.top();
-       // cout << "current puzzle, move:  : " << current.depth << endl;
-      // printPuzzle(current.puzzle);
         queue.pop();
         nodes_expanded++;
     
-    // is puzzle solved?
+    // if the goal state is reached
 if (is_goal(current.puzzle, goal)) {
     string puzzle = current.path;
     for (int i = 0; i < current.depth; i++) {
-        cout << "------------- move: " << i+1 << "-------------" << endl;
+        cout << "------------- depth: " << i+1 << "-------------" << endl;
         string row1 = puzzle.substr(i * 9, 3);
         string row2 = puzzle.substr(i * 9 + 3, 3);
         string row3 = puzzle.substr(i * 9 + 6, 3);
@@ -170,13 +167,13 @@ if (is_goal(current.puzzle, goal)) {
     return current.depth;
 }
 
-// generate children
-int dx[] = {-1, 0, 1, 0};
-int dy[] = {0, 1, 0, -1};
+// generate children (neighbors)
+int ox[] = {-1, 0, 1, 0};
+int oy[] = {0, 1, 0, -1};
 
 for (int i = 0; i < 4; i++) {
-    int x = current.x + dx[i];
-    int y = current.y + dy[i];
+    int x = current.x + ox[i];
+    int y = current.y + oy[i];
     if (x >= 0 && x < 3 && y >= 0 && y < 3) {
         Node child;
         memcpy(child.puzzle, current.puzzle, sizeof(child.puzzle));
@@ -203,7 +200,6 @@ for (int i = 0; i < 4; i++) {
         //cout << 
         
         child.path = current.path + state;
-        //cout << current.path << endl;
 
         if (visited.count(state) == 0) {
             visited.insert(state);
@@ -238,12 +234,12 @@ int main() {
     }
 
     int search;
-    cout << "1: use uniform cost search, 2: use A* with tiles misplaced heuristic or 2: use A* with euclidean distance heuristic: ";
+    cout << "1: use uniform cost search, 2: use A* with tiles misplaced heuristic or 3: use A* with euclidean distance heuristic: ";
     cin >> search;
 
     int result = solve(puzz,goal, search);
 
-    return 0;
+    return result;
 }
 
 
