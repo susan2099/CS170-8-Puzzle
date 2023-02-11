@@ -188,7 +188,6 @@ for (int i = 0; i < 4; i++) {
                 state += to_string(child.puzzle[i][j]);
             }
         }
-        //cout << 
         
         child.path = current.path + state;
 
