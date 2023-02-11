@@ -56,19 +56,10 @@ int euclideanDistance(int puzz[3][3], int goal[3][3]) {
     int count = 0;
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            if (puzz[i][j] != 0) {
-                int x, y;
-                for (int k = 0; k < 3; k++) {
-                    for (int l = 0; l < 3; l++) {
-                        if (goal[k][l] == puzz[i][j]) {
-                            x = k;
-                            y = l;
-                            break;
-                        }
-                    }
-                }
-                count += abs(i - x) + abs(j - y);
-            }
+            if (puzz[i][j] == 0) continue;
+            int x = (puzz[i][j] - 1) / 3;
+            int y = (puzz[i][j] - 1) % 3;
+            count += sqrt(pow(x - i, 2) + pow(y - j, 2));
         }
     }
     return count;
@@ -241,6 +232,7 @@ int main() {
 
     return result;
 }
+
 
 
 
